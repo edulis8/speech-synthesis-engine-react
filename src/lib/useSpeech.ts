@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-import { PlayingState } from './speech';
+import { PlayingState, createSpeechEngine } from "./speech";
 
 /*
   @description
@@ -15,17 +15,45 @@ const useSpeech = (sentences: Array<string>) => {
   const [currentWordRange, setCurrentWordRange] = useState([0, 0]);
 
   const [playbackState, setPlaybackState] = useState<PlayingState>("paused");
+  const options = {
+    onBoundary: (e: SpeechSynthesisEvent) => {
+      console.log('onBoundary', e); // gen range
+    },
+    onEnd: (e: SpeechSynthesisEvent) => {
+      console.log(e);
+      const next = currentSentenceIdx + 1;
+      // TODO update current word range
+      e.charIndex
+      e.charLength
+      const newRange = [e.charIndex, e.charIndex + e.charLength];
+      setCurrentSentenceIdx(next);
+      setCurrentWordRange(newRange);
+    },
+    onStateUpdate: (state: PlayingState) => {
+      console.log(state);
+    },
+  };
 
-  const play = () => {};
-  const pause = () => {};
+  const { play, pause, cancel, load } = createSpeechEngine(options);
+
+  const customPlay = (text: string) => {
+    load(text);
+    play();
+  };
+  const customPause = () => {
+    pause();
+  };
 
   return {
     currentSentenceIdx,
     currentWordRange,
     playbackState,
-    play,
-    pause,
+    play: customPlay,
+    pause: customPause,
   };
 };
 
 export { useSpeech };
+
+// currentSentence: sentences[currentSentenceIdx],
+//     currentWord: sentences[currentSentenceIdx]?.substring(currentWordRange[0], currentWordRange[1]),

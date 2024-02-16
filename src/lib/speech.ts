@@ -19,7 +19,8 @@ export type SpeechEngine = ReturnType<typeof createSpeechEngine>;
 
 /**
  * This speech engine is meant to be a simple adapter for using speech synthesis api.
- * This should generally be left for the candidate to use as the speech synthesis apis have a few nuances
+ * This should generally be left for the candidate to use as the speech 
+ * synthesis apis have a few nuances
  * that the candidate might not be familiar with.
  */
 const createSpeechEngine = (options: SpeechEngineOptions) => {
