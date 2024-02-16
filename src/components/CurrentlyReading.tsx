@@ -10,40 +10,61 @@
  *
  * red text highlight each word when you are playing
  */
-import {useEffect} from 'react';
-import { useSpeech } from "../lib/useSpeech";
-
 export const CurrentlyReading = ({
   currentWordRange,
   currentSentenceIdx,
   sentences,
 }: {
-  currentWordRange: [number, number]; // which word we are on
-  currentSentenceIdx: number; // which sentence we are on
-  sentences: string[]; // all
+  currentWordRange: [number, number];
+  currentSentenceIdx: number;
+  sentences: string[];
 }) => {
+  let [startWord, endWord] = currentWordRange;
 
-  const { playbackState, play, pause } = useSpeech(sentences);
+  if (sentences[currentSentenceIdx] && endWord === 0) {
+    const initEndWordIndex = sentences[currentSentenceIdx].split(" ")[0].length;
+    console.log({ initEndWordIndex });
+    endWord = initEndWordIndex;
+  }
 
-  useEffect(() => {
-    play(sentences[currentSentenceIdx]);
-    console.log(currentSentenceIdx)
-    console.log({currentWordRange})
-  }, [currentSentenceIdx])
+  if (!sentences.length) {
+    return <p>loading sentences 🤔...</p>;
+  }
 
-  // TODO
-  // if sentences[currentSentenceIdx] -> play it
-  // if word is in current word range, make it red
+  if (sentences[currentSentenceIdx] === undefined) {
+    return <p>please load more content...</p>;
+  }
+
   return (
-    <div data-testid="currently-reading">
-      {sentences.map((sentence, i) => (
-        <p key={i} data-testid="current-sentence">
-          {sentence}
-          <span style={{color: 'red'}} data-testid="current-word">
-            {sentence.substring(currentWordRange[0], currentWordRange[1])}
-          </span>
-        </p>
-      ))}
+    <div data-testid="currently-reading" className="currently-reading">
+      <p data-testid="current-sentence" className="currently-reading-text">
+        <span>{sentences[currentSentenceIdx].slice(0, startWord)}</span>
+        <span data-testid="current-word" className="currentword">
+          {sentences[currentSentenceIdx].slice(startWord, endWord)}
+        </span>
+        <span>{sentences[currentSentenceIdx].slice(endWord)}</span>
+      </p>
+      <section className="container">
+        {sentences.map((sentence, i) => (
+          <span key={i}>{sentence} </span>
+        ))}
+      </section>
+      {/* <section className="debug">
+        <pre>
+          <div>-------------</div>
+          <code>
+            <pre style={{ color: "red" }}>
+              {sentences[currentSentenceIdx].slice(startWord, endWord + 1)}
+            </pre>
+          </code>
+          <code>
+            currentWordRange {startWord} {endWord}
+          </code>
+        </pre>
+        <pre>
+          <code>currentSentenceIdx {currentSentenceIdx}</code>
+        </pre>
+      </section> */}
     </div>
   );
 };

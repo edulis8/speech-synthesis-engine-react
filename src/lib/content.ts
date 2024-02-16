@@ -5,10 +5,9 @@ const API_URL = "http://localhost:5174/content";
  * In case of an error, return content as "<speak><s>There was an error</s></speak>"
  */
 const fetchContent = async (url = API_URL): Promise<string> => {
-      const result = await fetch("http://localhost:5174/content");
-      const data = await result.json();
-      console.log({ data });
-      return data;
+  const result = await fetch("http://localhost:5174/content");
+  const data = await result.json();
+  return data;
 };
 
 /**
@@ -16,12 +15,21 @@ const fetchContent = async (url = API_URL): Promise<string> => {
  * Avoid using DOMParser for implementing this function.
  */
 const parseContentIntoSentences = (content: string) => {
-  const arr = content.split('</s>');
-  const regex = new RegExp('(<([^>]+)>)', 'gi');
-  const parsedStringArray = arr.map((el: string) => el.replace(regex, ''));
-  console.log({parsedStringArray})
+  if (content.indexOf("<speak>") !== 0) {
+    throw new Error();
+  }
+
+  const regexParseSentences = new RegExp("<s>(.*?)</s>", "gi");
+  const arr = content.match(regexParseSentences);
+  if (!arr || !arr.length) {
+    return "";
+  }
+
+  const regexStripTags = new RegExp("(<([^>]+)>)", "gi");
+  const parsedStringArray = arr.map((el: string) =>
+    el.replace(regexStripTags, "")
+  );
   return parsedStringArray;
 };
-
 
 export { fetchContent, parseContentIntoSentences };

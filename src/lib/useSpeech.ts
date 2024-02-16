@@ -1,5 +1,4 @@
 import { useState } from "react";
-
 import { PlayingState, createSpeechEngine } from "./speech";
 
 /*
@@ -10,27 +9,29 @@ import { PlayingState, createSpeechEngine } from "./speech";
   This hook should return react friendly controls for playing, and pausing audio as well as provide information about
   the currently read word and sentence
 */
+const INITIALIZED = "initialized";
+const PAUSED = "paused";
 const useSpeech = (sentences: Array<string>) => {
   const [currentSentenceIdx, setCurrentSentenceIdx] = useState(0);
   const [currentWordRange, setCurrentWordRange] = useState([0, 0]);
+  const [playbackState, setPlaybackState] = useState<PlayingState>(PAUSED);
 
-  const [playbackState, setPlaybackState] = useState<PlayingState>("paused");
   const options = {
     onBoundary: (e: SpeechSynthesisEvent) => {
-      console.log('onBoundary', e); // gen range
-    },
-    onEnd: (e: SpeechSynthesisEvent) => {
-      console.log(e);
-      const next = currentSentenceIdx + 1;
-      // TODO update current word range
-      e.charIndex
-      e.charLength
       const newRange = [e.charIndex, e.charIndex + e.charLength];
-      setCurrentSentenceIdx(next);
       setCurrentWordRange(newRange);
     },
+    onEnd: (e: SpeechSynthesisEvent) => {
+      setCurrentSentenceIdx((prevSentenceIdx) => prevSentenceIdx + 1);
+      setCurrentWordRange([0, 0]);
+    },
     onStateUpdate: (state: PlayingState) => {
-      console.log(state);
+      // when loading more content, reset everything
+      if (state === INITIALIZED) {
+        setCurrentSentenceIdx(0);
+        setCurrentWordRange([0, 0]);
+      }
+      setPlaybackState(state);
     },
   };
 
@@ -50,6 +51,7 @@ const useSpeech = (sentences: Array<string>) => {
     playbackState,
     play: customPlay,
     pause: customPause,
+    cancel,
   };
 };
 

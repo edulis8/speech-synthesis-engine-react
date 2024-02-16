@@ -20,24 +20,32 @@ import { parseContentIntoSentences, fetchContent } from "./lib/content.ts";
 
 function App() {
   const [sentences, setSentences] = useState<Array<string>>([]);
-  const { currentWordRange, currentSentenceIdx, playbackState, play, pause } =
-    useSpeech(sentences);
+  const [page, setPage] = useState(1);
+  const {
+    currentWordRange,
+    currentSentenceIdx,
+    playbackState,
+    play,
+    pause,
+    cancel,
+  } = useSpeech(sentences);
 
   useEffect(() => {
     (async () => {
       const result: any = await fetchContent();
-      console.log({ result });
       const content = result.content;
       const sentences = parseContentIntoSentences(content);
-      console.log({ sentences });
       setSentences(sentences);
     })();
-  }, []);
+  }, [page]);
 
-  function parentPlay() {
-    console.log(currentSentenceIdx);
+  function handlePlay() {
     play(sentences[currentSentenceIdx]);
-    console.log(currentSentenceIdx);
+  }
+
+  function handleLoadNewContent() {
+    cancel();
+    setPage((prevPage) => prevPage + 1);
   }
 
   return (
@@ -51,9 +59,12 @@ function App() {
         />
       </div>
       <div>
-        {/* state = "initialized" | "playing" | "paused" | "ended";  */}
-        {/* loadNewContent={loadNewContent} */}
-        <Controls play={parentPlay} pause={pause} state={playbackState} />
+        <Controls
+          play={handlePlay}
+          pause={pause}
+          loadNewContent={handleLoadNewContent}
+          state={playbackState}
+        />
       </div>
     </div>
   );
